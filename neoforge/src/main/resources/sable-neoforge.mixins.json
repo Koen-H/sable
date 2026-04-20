@@ -82,6 +82,8 @@
     "compatibility.create.block_breakers.BlockBreakingKineticBlockEntityDamageMixin",
     "compatibility.create.block_breakers.BlockBreakingKineticBlockEntityMixin",
     "compatibility.create.block_entity_config.BlockEntityConfigurationPacketMixin",
+    "compatibility.create.chain_conveyor.ChainConveyorBlockEntityMixin",
+    "compatibility.create.chain_conveyor.ChainConveyorBlockMixin",
     "compatibility.create.contraptions.AbstractContraptionEntityMixin",
     "compatibility.create.contraptions.ContraptionColliderMixin",
     "compatibility.create.contraptions.Matrix3dAccessor",
