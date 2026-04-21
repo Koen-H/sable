@@ -17,8 +17,14 @@ import java.util.UUID;
 
 public record ClientboundFreezePlayerPacket(UUID subLevelID, Vector3dc localPosition) implements SableTCPPacket {
 
+    private static final UUID UNFREEZE_UUID = new UUID(0, 0);
+
     public static final Type<ClientboundFreezePlayerPacket> TYPE = new Type<>(Sable.sablePath("freeze_player"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundFreezePlayerPacket> CODEC = StreamCodec.of((buf, value) -> value.write(buf), ClientboundFreezePlayerPacket::read);
+
+    public static ClientboundFreezePlayerPacket unfreeze() {
+        return new ClientboundFreezePlayerPacket(UNFREEZE_UUID, new Vector3d());
+    }
 
     private static ClientboundFreezePlayerPacket read(final FriendlyByteBuf buf) {
         return new ClientboundFreezePlayerPacket(buf.readUUID(), SableBufferUtils.read(buf, new Vector3d()));
@@ -39,6 +45,10 @@ public record ClientboundFreezePlayerPacket(UUID subLevelID, Vector3dc localPosi
         final Player player = context.player();
         assert player != null;
 
-        ((PlayerFreezeExtension) player).sable$freezeTo(this.subLevelID, this.localPosition);
+        if (UNFREEZE_UUID.equals(this.subLevelID)) {
+            ((PlayerFreezeExtension) player).sable$freezeTo(null, null);
+        } else {
+            ((PlayerFreezeExtension) player).sable$freezeTo(this.subLevelID, this.localPosition);
+        }
     }
 }

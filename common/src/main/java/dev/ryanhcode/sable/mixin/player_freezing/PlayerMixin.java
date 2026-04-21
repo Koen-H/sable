@@ -65,6 +65,9 @@ public abstract class PlayerMixin extends Entity implements PlayerFreezeExtensio
     public void sable$freezeTo(final UUID subLevelID, final Vector3dc localPosition) {
         this.sable$frozenToSubLevel = subLevelID;
         this.sable$frozenToSubLevelAnchor = localPosition;
+        if (subLevelID != null) {
+            this.sable$frozenTicks = 0;
+        }
 
         if (this.sable$frozenToSubLevel != null) {
             final SubLevelContainer container = SubLevelContainer.getContainer(this.level());
