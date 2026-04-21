@@ -30,16 +30,13 @@ public class ServerPlayerMixin {
         final SubLevel subLevel = Sable.HELPER.getContaining(serverLevel, localPos);
 
         if (subLevel instanceof final ServerSubLevel serverSubLevel) {
-            // Teleport directly to the chunk-grid position — entities in sub-levels live at chunk-grid coords.
-            // Do NOT use projectOutOfSubLevel here: that converts to visual coords, but sable$teleport()
-            // on the client calls lastPose().transformPosition(anchor) which expects chunk-grid input,
-            // causing a ~20M desync if we pre-transform.
             final boolean result = original.call(serverLevel, x, y, z, set, g, h);
 
             if (result) {
-                ((PlayerFreezeExtension) this).sable$freezeTo(serverSubLevel.getUniqueId(), localPos);
+                final Vector3d localAnchor = serverSubLevel.logicalPose().transformPositionInverse(localPos, new Vector3d());
+                ((PlayerFreezeExtension) this).sable$freezeTo(serverSubLevel.getUniqueId(), localAnchor);
                 this.connection.send(new ClientboundCustomPayloadPacket(
-                        new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localPos)
+                        new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localAnchor)
                 ));
             }
 

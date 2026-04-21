@@ -35,9 +35,10 @@ public abstract class EntityChangeDimensionMixin {
             final Entity result = original.call(transition);
 
             if (result instanceof final ServerPlayer resultPlayer) {
-                ((PlayerFreezeExtension) resultPlayer).sable$freezeTo(serverSubLevel.getUniqueId(), localPos);
+                final Vector3d localAnchor = serverSubLevel.logicalPose().transformPositionInverse(localPos, new Vector3d());
+                ((PlayerFreezeExtension) resultPlayer).sable$freezeTo(serverSubLevel.getUniqueId(), localAnchor);
                 resultPlayer.connection.send(new ClientboundCustomPayloadPacket(
-                        new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localPos)
+                        new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localAnchor)
                 ));
             }
 

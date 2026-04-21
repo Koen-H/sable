@@ -33,9 +33,10 @@ public class ServerGamePacketListenerImplMixin {
 
         if (subLevel instanceof final ServerSubLevel serverSubLevel) {
             original.call(x, y, z, yRot, xRot);
-            ((PlayerFreezeExtension) this.player).sable$freezeTo(serverSubLevel.getUniqueId(), localPos);
+            final Vector3d localAnchor = serverSubLevel.logicalPose().transformPositionInverse(localPos, new Vector3d());
+            ((PlayerFreezeExtension) this.player).sable$freezeTo(serverSubLevel.getUniqueId(), localAnchor);
             this.player.connection.send(new ClientboundCustomPayloadPacket(
-                    new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localPos)
+                    new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localAnchor)
             ));
         } else {
             ((PlayerFreezeExtension) this.player).sable$freezeTo(null, null);
