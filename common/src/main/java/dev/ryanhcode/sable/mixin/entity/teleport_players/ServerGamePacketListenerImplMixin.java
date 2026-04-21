@@ -32,8 +32,7 @@ public class ServerGamePacketListenerImplMixin {
         final SubLevel subLevel = Sable.HELPER.getContaining(level, localPos);
 
         if (subLevel instanceof final ServerSubLevel serverSubLevel) {
-            final Vector3d globalPos = Sable.HELPER.projectOutOfSubLevel(level, localPos, new Vector3d());
-            original.call(globalPos.x, globalPos.y, globalPos.z, yRot, xRot);
+            original.call(x, y, z, yRot, xRot);
             ((PlayerFreezeExtension) this.player).sable$freezeTo(serverSubLevel.getUniqueId(), localPos);
             this.player.connection.send(new ClientboundCustomPayloadPacket(
                     new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localPos)

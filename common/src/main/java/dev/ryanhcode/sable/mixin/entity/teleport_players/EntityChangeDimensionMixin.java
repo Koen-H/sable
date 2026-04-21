@@ -12,16 +12,15 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.DimensionTransition;
 import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 
 /**
  * Handles Mekanism's cross-dimension teleport path, which calls
- * entity.changeDimension(DimensionTransition). Transforms sub-level local
- * coordinates in the destination transition to global world coordinates.
+ * entity.changeDimension(DimensionTransition). Clears any stale player freeze
+ * and, for sub-level destinations, sets a new freeze so the client repositions
+ * correctly once the destination sub-level finalizes.
  */
 @Mixin(Entity.class)
 public abstract class EntityChangeDimensionMixin {
@@ -33,19 +32,8 @@ public abstract class EntityChangeDimensionMixin {
         final SubLevel subLevel = Sable.HELPER.getContaining(targetLevel, localPos);
 
         if (subLevel instanceof final ServerSubLevel serverSubLevel) {
-            final Vector3d globalPos = Sable.HELPER.projectOutOfSubLevel(targetLevel, localPos, new Vector3d());
-            final DimensionTransition corrected = new DimensionTransition(
-                    targetLevel,
-                    JOMLConversion.toMojang(globalPos),
-                    transition.speed(),
-                    transition.yRot(),
-                    transition.xRot(),
-                    transition.postDimensionTransition()
-            );
-            final Entity result = original.call(corrected);
+            final Entity result = original.call(transition);
 
-            // For players, set up a freeze so the client repositions correctly
-            // relative to the sub-level once it finalizes in the new dimension.
             if (result instanceof final ServerPlayer resultPlayer) {
                 ((PlayerFreezeExtension) resultPlayer).sable$freezeTo(serverSubLevel.getUniqueId(), localPos);
                 resultPlayer.connection.send(new ClientboundCustomPayloadPacket(
@@ -56,7 +44,7 @@ public abstract class EntityChangeDimensionMixin {
             return result;
         }
 
-        // Clear any stale player freeze when cross-dimension teleporting to a non-sub-level position
+        // Clear any stale player freeze when teleporting to a non-sub-level position
         final Entity self = (Entity) (Object) this;
         if (self instanceof final ServerPlayer player) {
             ((PlayerFreezeExtension) player).sable$freezeTo(null, null);
