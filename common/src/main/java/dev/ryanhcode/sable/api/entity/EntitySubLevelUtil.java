@@ -96,4 +96,8 @@ public class EntitySubLevelUtil {
     public static boolean hasCustomEntityOrientation(final Entity entity) {
         return false;
     }
+
+    public static Vec3 getEyePositionInterpolated(final Entity entity, final float partialTicks) {
+        return Sable.HELPER.getEyePositionInterpolated(entity, partialTicks);
+    }
 }
