@@ -1,5 +1,6 @@
 package dev.ryanhcode.sable.mixin.player_freezing;
 
+import dev.ryanhcode.sable.Sable;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.mixinterface.entity.entity_sublevel_collision.EntityMovementExtension;
 import dev.ryanhcode.sable.mixinterface.entity.entity_sublevel_collision.LivingEntityMovementExtension;
@@ -56,6 +57,7 @@ public abstract class PlayerMixin extends Entity implements PlayerFreezeExtensio
     public void sable$tickStopFreezing() {
         if (this.sable$frozenToSubLevel != null) {
             if (this.sable$frozenTicks++ > 160) {
+                Sable.LOGGER.warn("[Sable] Freeze timed out (160 ticks) for sub-level {}, clearing", this.sable$frozenToSubLevel);
                 this.sable$freezeTo(null, null);
             }
         }
@@ -91,9 +93,12 @@ public abstract class PlayerMixin extends Entity implements PlayerFreezeExtensio
 
             if (subLevel != null) {
                 final Vector3d newPos = subLevel.lastPose().transformPosition(new Vector3d(this.sable$frozenToSubLevelAnchor));
+                Sable.LOGGER.info("[Sable] sable$teleport() resolving: subLevel={}, anchor={}, newPos=({}, {}, {})", this.sable$frozenToSubLevel, this.sable$frozenToSubLevelAnchor, newPos.x, newPos.y, newPos.z);
                 this.setPos(newPos.x, newPos.y, newPos.z);
                 ((EntityMovementExtension) this).sable$setTrackingSubLevel(subLevel);
                 ((LivingEntityMovementExtension) this).sable$getInheritedVelocity().zero();
+            } else {
+                Sable.LOGGER.warn("[Sable] sable$teleport(): sub-level {} not found in container, freeze will time out", this.sable$frozenToSubLevel);
             }
         }
     }

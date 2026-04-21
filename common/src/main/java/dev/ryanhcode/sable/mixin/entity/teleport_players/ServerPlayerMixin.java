@@ -34,6 +34,7 @@ public class ServerPlayerMixin {
 
             if (result) {
                 final Vector3d localAnchor = serverSubLevel.logicalPose().transformPositionInverse(localPos, new Vector3d());
+                Sable.LOGGER.info("[Sable] Freezing player for sub-level teleport: subLevel={}, visualPos={}, anchor={}", serverSubLevel.getUniqueId(), localPos, localAnchor);
                 ((PlayerFreezeExtension) this).sable$freezeTo(serverSubLevel.getUniqueId(), localAnchor);
                 this.connection.send(new ClientboundCustomPayloadPacket(
                         new ClientboundFreezePlayerPacket(serverSubLevel.getUniqueId(), localAnchor)
