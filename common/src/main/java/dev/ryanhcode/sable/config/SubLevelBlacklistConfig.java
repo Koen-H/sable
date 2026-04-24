@@ -38,6 +38,14 @@ public final class SubLevelBlacklistConfig {
         return blacklisted.contains(BuiltInRegistries.BLOCK.getKey(state.getBlock()));
     }
 
+    public static Set<ResourceLocation> getBlacklisted() {
+        return blacklisted;
+    }
+
+    public static Path getConfigPath() {
+        return SableLoaderPlatform.INSTANCE.getConfigDir().resolve(CONFIG_FILE);
+    }
+
     private static void writeDefault(final Path path) {
         try {
             Files.createDirectories(path.getParent());

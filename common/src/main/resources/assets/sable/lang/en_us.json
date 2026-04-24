@@ -1,6 +1,12 @@
 {
   "menu.savingSubLevels": "Saving sub-levels",
 
+  "commands.sable.blacklist.header": "--- Sub-level Block Blacklist ---",
+  "commands.sable.blacklist.config_section": "Config (%s):",
+  "commands.sable.blacklist.tag_section": "Tag (sable:sublevel_blacklisted):",
+  "commands.sable.blacklist.empty": "  (none)",
+  "commands.sable.blacklist.open_file": "Click to open config file",
+
   "commands.sable.helper.missing_sub_level_container": "Couldn't find sub-level container for this level!",
   "commands.sable.helper.missing_physics_system": "Couldn't find sub-level physics system for this level!",
 
