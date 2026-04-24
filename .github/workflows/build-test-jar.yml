@@ -1,0 +1,44 @@
+name: Build Test JAR
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+
+      - name: Build NeoForge JAR
+        run: ./gradlew :neoforge:build
+
+      - name: Upload NeoForge JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: sable-neoforge
+          path: |
+            neoforge/build/libs/*.jar
+            !neoforge/build/libs/*-dev.jar
+            !neoforge/build/libs/*-sources.jar
+          retention-days: 7
