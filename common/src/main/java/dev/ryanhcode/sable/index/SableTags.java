@@ -31,6 +31,11 @@ public class SableTags {
             Sable.sablePath("bouncy")
     );
 
+    public static final TagKey<Block> SUBLEVEL_BLACKLISTED = TagKey.create(
+            Registries.BLOCK,
+            Sable.sablePath("sublevel_blacklisted")
+    );
+
     public static final TagKey<Item> PADDLES = TagKey.create(
             Registries.ITEM,
             Sable.sablePath("paddles")

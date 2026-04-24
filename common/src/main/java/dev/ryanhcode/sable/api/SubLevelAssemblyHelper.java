@@ -18,6 +18,7 @@ import dev.ryanhcode.sable.sublevel.system.SubLevelPhysicsSystem;
 import dev.ryanhcode.sable.sublevel.tracking_points.SubLevelTrackingPointSavedData;
 import dev.ryanhcode.sable.sublevel.tracking_points.TrackingPoint;
 import dev.ryanhcode.sable.util.BoundedBitVolume3i;
+import dev.ryanhcode.sable.index.SableTags;
 import dev.ryanhcode.sable.util.LevelAccelerator;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -291,6 +292,7 @@ public class SubLevelAssemblyHelper {
         final LevelAccelerator resultingAccelerator = new LevelAccelerator(resultingLevel);
 
         final List<BlockState> states = new ArrayList<>();
+        final ObjectOpenHashSet<BlockPos> blacklistedPositions = new ObjectOpenHashSet<>();
 
         BlockPos firstBlock = null;
         Vector2i chunkBoundsMin = null;
@@ -299,6 +301,13 @@ public class SubLevelAssemblyHelper {
             if (firstBlock == null) {
                 firstBlock = block;
             }
+
+            final BlockState state = accelerator.getBlockState(block);
+            if (state.is(SableTags.SUBLEVEL_BLACKLISTED)) {
+                Sable.LOGGER.warn("Block {} at {} is in sable:sublevel_blacklisted and will not be assembled into the sub-level", state.getBlock(), block);
+                blacklistedPositions.add(block.immutable());
+            }
+
             final ChunkPos chunk = new ChunkPos(transform.apply(block));
 
             final Vector2i jomlChunkPos = new Vector2i(chunk.x, chunk.z);
@@ -326,6 +335,11 @@ public class SubLevelAssemblyHelper {
 
         SableAssemblyPlatform.INSTANCE.setIgnoreOnPlace(resultingLevel, true);
         for (final BlockPos block : blocks) {
+            if (blacklistedPositions.contains(block)) {
+                states.add(null);
+                continue;
+            }
+
             final BlockState state = accelerator.getBlockState(block);
             final BlockPos newPos = transform.apply(block);
 
@@ -377,22 +391,29 @@ public class SubLevelAssemblyHelper {
 
         int i = 0;
         for (final BlockPos untransformed : blocks) {
+            final BlockState subLevelState = states.get(i++);
+            if (subLevelState == null) {
+                continue;
+            }
+
             final BlockPos pos = transform.apply(untransformed);
 
             try {
                 final LevelChunk levelchunk = resultingAccelerator.getChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
-                final BlockState subLevelState = states.get(i);
-                SubLevelAssemblyHelper.markAndNotifyBlock(resultingLevel, pos, levelchunk, Blocks.AIR.defaultBlockState(), subLevelState, 3, 512);
+                final BlockState oldState = Blocks.AIR.defaultBlockState();
+                SubLevelAssemblyHelper.markAndNotifyBlock(resultingLevel, pos, levelchunk, oldState, subLevelState, 3, 512);
             } catch (final Exception e) {
                 Sable.LOGGER.error("Failed to mark & notify block {} (untransformed = {})", pos, untransformed, e);
             }
-
-            i++;
         }
 
         SableAssemblyPlatform.INSTANCE.setIgnoreOnPlace(resultingLevel, true);
-        // destroy all the old blocks
+        // destroy all the old blocks (blacklisted blocks are left in place)
         for (final BlockPos block : blocks) {
+            if (blacklistedPositions.contains(block)) {
+                continue;
+            }
+
             final BlockState subLevelState = Blocks.AIR.defaultBlockState();
 
             try {
@@ -407,6 +428,9 @@ public class SubLevelAssemblyHelper {
         SableAssemblyPlatform.INSTANCE.setIgnoreOnPlace(resultingLevel, false);
 
         for (final BlockPos block : blocks) {
+            if (blacklistedPositions.contains(block)) {
+                continue;
+            }
             final BlockState subLevelState = Blocks.AIR.defaultBlockState();
             resultingLevel.sendBlockUpdated(block, Blocks.STONE.defaultBlockState(), subLevelState, 3);
         }
