@@ -6,6 +6,7 @@ import dev.ryanhcode.sable.api.physics.force.ForceGroups;
 import dev.ryanhcode.sable.api.sublevel.ServerSubLevelContainer;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.companion.SableCompanion;
+import dev.ryanhcode.sable.config.SubLevelBlacklistConfig;
 import dev.ryanhcode.sable.index.SableTags;
 import dev.ryanhcode.sable.network.tcp.SableTCPPackets;
 import dev.ryanhcode.sable.physics.config.block_properties.PhysicsBlockPropertiesDefinitionLoader;
@@ -41,6 +42,7 @@ public final class Sable {
         SableTags.register();
         PhysicsBlockPropertyTypes.register();
         ForceGroups.register();
+        SubLevelBlacklistConfig.load();
 
         LOGGER.info("{} loaded!", MOD_NAME);
     }

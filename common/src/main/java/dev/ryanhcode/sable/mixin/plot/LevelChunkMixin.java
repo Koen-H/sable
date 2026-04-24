@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.ryanhcode.sable.Sable;
 import dev.ryanhcode.sable.SableCommonEvents;
 import dev.ryanhcode.sable.api.SubLevelHelper;
+import dev.ryanhcode.sable.config.SubLevelBlacklistConfig;
 import dev.ryanhcode.sable.index.SableTags;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import net.minecraft.core.BlockPos;
@@ -55,7 +56,7 @@ public class LevelChunkMixin {
 
     @WrapOperation(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"))
     private BlockState sable$setBlockState(final LevelChunkSection instance, int pX, int pY, int pZ, final BlockState newState, final Operation<BlockState> original) {
-        if (this.sable$blockSet != null && newState.is(SableTags.SUBLEVEL_BLACKLISTED) && this.level instanceof ServerLevel) {
+        if (this.sable$blockSet != null && (newState.is(SableTags.SUBLEVEL_BLACKLISTED) || SubLevelBlacklistConfig.isBlacklisted(newState)) && this.level instanceof ServerLevel) {
             final SubLevel subLevel = Sable.HELPER.getContaining(this.level, this.sable$blockSet);
             if (subLevel != null) {
                 // Return newState so the caller sees oldState == newState and treats it as a no-op

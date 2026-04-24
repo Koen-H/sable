@@ -18,6 +18,7 @@ import dev.ryanhcode.sable.sublevel.system.SubLevelPhysicsSystem;
 import dev.ryanhcode.sable.sublevel.tracking_points.SubLevelTrackingPointSavedData;
 import dev.ryanhcode.sable.sublevel.tracking_points.TrackingPoint;
 import dev.ryanhcode.sable.util.BoundedBitVolume3i;
+import dev.ryanhcode.sable.config.SubLevelBlacklistConfig;
 import dev.ryanhcode.sable.index.SableTags;
 import dev.ryanhcode.sable.util.LevelAccelerator;
 import it.unimi.dsi.fastutil.Pair;
@@ -303,8 +304,8 @@ public class SubLevelAssemblyHelper {
             }
 
             final BlockState state = accelerator.getBlockState(block);
-            if (state.is(SableTags.SUBLEVEL_BLACKLISTED)) {
-                Sable.LOGGER.warn("Block {} at {} is in sable:sublevel_blacklisted and will not be assembled into the sub-level", state.getBlock(), block);
+            if (state.is(SableTags.SUBLEVEL_BLACKLISTED) || SubLevelBlacklistConfig.isBlacklisted(state)) {
+                Sable.LOGGER.warn("Block {} at {} is blacklisted and will not be assembled into the sub-level", state.getBlock(), block);
                 blacklistedPositions.add(block.immutable());
             }
 
